@@ -1,24 +1,19 @@
 namespace :copy do
-
   archive_name = "archive.tar.gz"
-  include_dir  = fetch(:include_dir) || "*"
-  exclude_dir  = Array(fetch(:exclude_dir))
-
-  exclude_args = exclude_dir.map { |dir| "--exclude '#{dir}'"}
-
-  # Defalut to :all roles
-  tar_roles = fetch(:tar_roles, :all)
-
-  tar_verbose = fetch(:tar_verbose, true) ? "v" : ""
 
   desc "Archive files to #{archive_name}"
-  file archive_name => FileList[include_dir].exclude(archive_name) do |t|
+  file archive_name => FileList[fetch(:include_dir) || "*"].exclude(archive_name) do |t|
+    exclude_dir  = Array(fetch(:exclude_dir))
+    exclude_args = exclude_dir.map { |dir| "--exclude '#{dir}'"}
+    tar_verbose  = fetch(:tar_verbose, true) ? "v" : ""
+
     cmd = ["tar -c#{tar_verbose}zf #{t.name}", *exclude_args, *t.prerequisites]
     sh cmd.join(' ')
   end
 
   desc "Deploy #{archive_name} to release_path"
   task :deploy => archive_name do |t|
+    tar_roles = fetch(:tar_roles, :all)
     tarball = t.prerequisites.first
 
     on roles(tar_roles) do
