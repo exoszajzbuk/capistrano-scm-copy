@@ -2,10 +2,11 @@ namespace :copy do
   archive_name = "archive.tar.gz"
 
   desc "Archive files to #{archive_name}"
-  file archive_name => FileList[fetch(:include_dir) || "*"].exclude(archive_name) do |t|
-    exclude_dir  = Array(fetch(:exclude_dir))
-    exclude_args = exclude_dir.map { |dir| "--exclude '#{dir}'"}
-    tar_verbose  = fetch(:tar_verbose, true) ? "v" : ""
+  file archive_name => FileList['*'].exclude(archive_name) do |t|
+    includes     = Array(fetch(:copy_include))
+    excludes     = Dir.glob('*') - includes
+    exclude_args = excludes.map { |item| "--exclude '#{item}'"}
+    tar_verbose  = fetch(:tar_verbose, false) ? "v" : ""
 
     cmd = ["tar -c#{tar_verbose}zf #{t.name}", *exclude_args, *t.prerequisites]
     sh cmd.join(' ')
@@ -18,7 +19,6 @@ namespace :copy do
 
     on roles(tar_roles) do
       # Make sure the release directory exists
-      puts "==> release_path: #{release_path} is created on #{tar_roles} roles <=="
       execute :mkdir, "-p", release_path
 
       # Create a temporary file on the server
@@ -41,5 +41,4 @@ namespace :copy do
   task :create_release => :deploy
   task :check
   task :set_current_revision
-
 end
