@@ -42,7 +42,7 @@ namespace :copy do
   task :check
   task :set_current_revision do |t|
     run_locally do
-      revision = capture(:git, "rev-list --max-count=1 --abbrev-commit #{fetch(:branch)}").strip
+      revision = capture(:git, "rev-list --max-count=1 --abbrev-commit origin/#{fetch(:branch)}").strip
       set :current_revision, revision
     end
   end
