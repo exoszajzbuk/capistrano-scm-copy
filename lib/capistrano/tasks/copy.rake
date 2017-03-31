@@ -13,7 +13,7 @@ namespace :copy do
   end
 
   desc "Deploy #{archive_name} to release_path"
-  task :deploy => archive_name do |t|
+  task :archive => archive_name do |t|
     tar_roles = fetch(:tar_roles, :all)
     tarball = t.prerequisites.first
 
@@ -38,7 +38,7 @@ namespace :copy do
 
   after 'deploy:finished', 'copy:clean'
 
-  task :create_release => :deploy
+  task :create_release => :archive
   task :check
   task :set_current_revision do |t|
     run_locally do
